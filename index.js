@@ -8,22 +8,21 @@ function initApp(app, config) {
 	app.set("view engine", "ejs");
 	app.set("views", __dirname + "/views");
 	app.get("/", function(req, res){
-		var visitId = req.query.visit_id;
-		console.log(visitId);
-		if( visitId === undefined || visitId === "" ){
+		var visitIdSrc = req.query.visit_id;
+		console.log(visitIdSrc);
+		if( visitIdSrc === undefined || visitIdSrc === "" ){
 			res.render("error", { message: "visit_id が指定されていません。"});
 			return;
 		}
+		var visitId = +visitIdSrc;
+		if( !(visitId > 0) ){
+			res.render("error", { message: "visit_id の値が不適切です。"});
+			return;
+		}
 		res.render("preview", {
-			data: {x:10, y:20}
+			data: { visitId: visitId }
 		})
 	});
-	
-	// app.get("/preview", function(req, res){
-	// 	res.render("preview", {
-	// 		data: {x:10, y:20}
-	// 	});
-	// });
 	
     app.get("/config", function (req, res) {
         res.set({
