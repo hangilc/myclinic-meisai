@@ -49,12 +49,23 @@ class MeisaiForm {
         let comp = this.comp;
         let [row1, row2] = box.splitToEvenRows(2);
         this.renderUpperBoxRow1(row1);
-        comp.box(row2);
+        this.renderUpperBoxRow2(row2);
     }
     renderUpperBoxRow1(box) {
         let comp = this.comp;
         comp.box(box);
-        let cols = box.splitToColumns();
+        let cols = box.splitToColumnsByWidths(16, 31, 10, 39, 17);
+        cols.forEach(col => {
+            comp.box(col);
+        });
+    }
+    renderUpperBoxRow2(box) {
+        let comp = this.comp;
+        comp.box(box);
+        let cols = box.splitToColumnsByWidths(16);
+        cols.forEach(col => {
+            comp.box(col);
+        });
     }
 }
 exports.MeisaiForm = MeisaiForm;

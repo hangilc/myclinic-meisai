@@ -30,7 +30,7 @@
     "kanjidate": "^1.1.2",
     "moment": "^2.17.1",
     "myclinic-consts": "^0.1.1",
-    "myclinic-drawer": "^1.0.6",
+    "myclinic-drawer": "^1.0.8",
     "myclinic-drawer-print-server": "^2.0.1",
     "myclinic-web": "^1.0.11",
     "raw-loader": "^0.5.1",

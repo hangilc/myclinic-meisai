@@ -337,6 +337,18 @@
 		return boxes;
 	};
 
+	Box.prototype.splitToColumnsByWidths = function(){
+		var widths = Array.prototype.slice.apply(arguments);
+		var divs = [];
+		var x = 0;
+		for(var i=0;i<widths.length;i++){
+			var width = widths[i];
+			x += width;
+			divs.push(x);
+		}
+		return Box.prototype.splitToColumns.apply(this, divs);
+	}
+
 	Box.prototype.splitToRows = function(){
 		var divs = Array.prototype.slice.apply(arguments);
 		var boxes = [], i, n = divs.length, left, top, right, bottom;
@@ -349,6 +361,18 @@
 		}
 		return boxes;
 	};
+
+	Box.prototype.splitToRowsByHeights = function(){
+		var heights = Array.prototype.slice.apply(arguments);
+		var divs = [];
+		var y = 0;
+		for(var i=0;i<heights.length;i++){
+			var height = heights[i];
+			y += height;
+			divs.push(y);
+		}
+		return Box.prototype.splitToRows.apply(this, divs);
+	}
 
 	Box.prototype.splitToEvenColumns = function(nCols){
 		var w = this.width() / nCols, divs = [], i;
@@ -11638,12 +11662,23 @@
 	        let comp = this.comp;
 	        let [row1, row2] = box.splitToEvenRows(2);
 	        this.renderUpperBoxRow1(row1);
-	        comp.box(row2);
+	        this.renderUpperBoxRow2(row2);
 	    }
 	    renderUpperBoxRow1(box) {
 	        let comp = this.comp;
 	        comp.box(box);
-	        let cols = box.splitToColumns();
+	        let cols = box.splitToColumnsByWidths(16, 31, 10, 39, 17);
+	        cols.forEach(col => {
+	            comp.box(col);
+	        });
+	    }
+	    renderUpperBoxRow2(box) {
+	        let comp = this.comp;
+	        comp.box(box);
+	        let cols = box.splitToColumnsByWidths(16);
+	        cols.forEach(col => {
+	            comp.box(col);
+	        });
 	    }
 	}
 	exports.MeisaiForm = MeisaiForm;
