@@ -6,10 +6,8 @@
   "scripts": {
     "build": "npm run compile && npm run bundle",
     "compile": "tsc -p browser-src",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "bundle": "npm run bundle-main && npm run bundle-preview",
-    "bundle-main": "webpack browser-src/main.js static/bundle.js",
-    "bundle-preview": "webpack browser-src/preview-main.js static/preview-bundle.js"
+    "bundle": "webpack browser-src/preview-main.js static/preview-bundle.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
