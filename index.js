@@ -1,6 +1,6 @@
 "use strict";
 var path = require("path");
-var slashes = require("connect-slashes");
+//var slashes = require("connect-slashes");
 
 exports.staticDir = path.join(__dirname, "static");
 
@@ -20,7 +20,8 @@ function initApp(app, config) {
 			return;
 		}
 		res.render("preview", {
-			data: { visitId: visitId }
+			data: { visitId: visitId },
+			baseUrl: req.baseUrl + "/"
 		})
 	});
 	
@@ -31,6 +32,6 @@ function initApp(app, config) {
         res.send("var config = " + JSON.stringify(config) + ";");
     });
 
-    app.use(slashes());
+    //app.use(slashes());
 }
 exports.initApp = initApp;
