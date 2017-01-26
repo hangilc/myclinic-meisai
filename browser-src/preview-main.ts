@@ -1,15 +1,15 @@
-import { Compiler, drawerToSvg } from "myclinic-drawer";
+import { drawerToSvg, Op } from "myclinic-drawer";
 import * as service from "./service";
 import { PrinterWidget } from "./print-util";
+import { MeisaiForm } from "./meisai-form";
 
 let data = window["data"];
 
-let comp = new Compiler();
-comp.moveTo(data.x, data.y);
-comp.lineTo(100, 200);
-let ops = comp.getOps();
+let form = new MeisaiForm();
+form.done();
+let pages: Op[][] = form.getPages();
 let previewArea = document.getElementById("preview-wrapper");
-let previewSvg = drawerToSvg(ops, {
+let previewSvg = drawerToSvg(pages.length > 0 ? pages[0] : [], {
 	width: "210mm",
 	height: "297mm",
 	viewBox: "0 0 210 297"
@@ -21,6 +21,6 @@ let printerSettingKey = "meisai-printer-setting";
 let printerWidget = document.getElementById("printer-widget");
 if( printerWidget !== null ){
 	let widget = new PrinterWidget(printerSettingKey);
-	widget.setPages([ops]);
+	widget.setPages(pages);
 	printerWidget.appendChild(widget.dom);
 }
