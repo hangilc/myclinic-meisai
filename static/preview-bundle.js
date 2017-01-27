@@ -45,6 +45,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+	    return new (P || (P = Promise))(function (resolve, reject) {
+	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+	        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+	        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+	        step((generator = generator.apply(thisArg, _arguments || [])).next());
+	    });
+	};
 	const myclinic_drawer_1 = __webpack_require__(1);
 	const print_util_1 = __webpack_require__(6);
 	const meisai_form_1 = __webpack_require__(11);
@@ -68,6 +76,11 @@
 	    widget.setPages(pages);
 	    printerWidget.appendChild(widget.dom);
 	}
+	const service_1 = __webpack_require__(8);
+	(() => __awaiter(this, void 0, void 0, function* () {
+	    let visit = yield service_1.getVisit(1000);
+	    console.log(visit);
+	}))();
 
 
 /***/ },
@@ -1316,6 +1329,7 @@
 	"use strict";
 	const request_1 = __webpack_require__(9);
 	//
+	const model_1 = __webpack_require__(12);
 	function print(pages, setting) {
 	    return request_1.request("/printer/print", { pages: pages, setting: setting }, "POST", request_1.convertToString);
 	}
@@ -1324,6 +1338,10 @@
 	    return request_1.request("/printer/setting", {}, "GET", request_1.arrayConverter(request_1.convertToString));
 	}
 	exports.listPrinterSettings = listPrinterSettings;
+	function getVisit(visitId) {
+	    return request_1.request("/service/?_q=get_visit", { visit_id: visitId }, "GET", model_1.jsonToVisit);
+	}
+	exports.getVisit = getVisit;
 
 
 /***/ },
@@ -11722,6 +11740,45 @@
 	    }
 	}
 	exports.MeisaiForm = MeisaiForm;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	function __export(m) {
+	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+	}
+	__export(__webpack_require__(13));
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class Visit {
+	}
+	exports.Visit = Visit;
+	function fillVisitFromJson(visit, src) {
+	    visit.visitId = src.visit_id;
+	    visit.patientId = src.patient_id;
+	    visit.visitedAt = src.v_datetime;
+	    visit.shahokokuhoId = src.shahokokuho_id;
+	    visit.koukikoureiId = src.koukikourei_id;
+	    visit.roujinId = src.roujin_id;
+	    visit.kouhi1Id = src.kouhi_1_id;
+	    visit.kouhi2Id = src.kouhi_2_id;
+	    visit.kouhi3Id = src.kouhi_3_id;
+	}
+	exports.fillVisitFromJson = fillVisitFromJson;
+	function jsonToVisit(src) {
+	    let visit = new Visit();
+	    fillVisitFromJson(visit, src);
+	    return visit;
+	}
+	exports.jsonToVisit = jsonToVisit;
 
 
 /***/ }

@@ -24,3 +24,10 @@ if( printerWidget !== null ){
 	widget.setPages(pages);
 	printerWidget.appendChild(widget.dom);
 }
+
+import { getVisit } from "./service";
+
+(async () => {
+	let visit = await getVisit(1000);
+	console.log(visit);
+})();

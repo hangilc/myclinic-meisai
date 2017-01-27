@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const myclinic_drawer_1 = require("myclinic-drawer");
 const print_util_1 = require("./print-util");
 const meisai_form_1 = require("./meisai-form");
@@ -22,3 +30,8 @@ if (printerWidget !== null) {
     widget.setPages(pages);
     printerWidget.appendChild(widget.dom);
 }
+const service_1 = require("./service");
+(() => __awaiter(this, void 0, void 0, function* () {
+    let visit = yield service_1.getVisit(1000);
+    console.log(visit);
+}))();
