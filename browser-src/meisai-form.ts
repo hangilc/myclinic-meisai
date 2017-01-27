@@ -24,7 +24,7 @@ export class MeisaiForm {
 		comp.setFont("title-font");
 		comp.textAt("診療明細書", box.cx(), 30, "center", "center");
 		this.renderUpperBox(upperBox);
-		comp.box(lowerBox);
+		this.renderLowerBox(lowerBox);
 	}
 
 	done(): void {
@@ -62,7 +62,20 @@ export class MeisaiForm {
 		let cols = box.splitToColumnsByWidths(16, 31, 10, 39, 17);
 		cols.forEach(col => {
 			comp.box(col);
-		})
+		});
+		comp.setFont("regular");
+		{
+			let c = cols[0];
+			comp.textIn("患者番号", c, "center", "center");
+		}
+		{
+			let c = cols[2];
+			comp.textIn("氏名", c, "center", "center");
+		}
+		{
+			let c = cols[4];
+			comp.textIn("受診日", c, "center", "center");
+		}
 	}
 
 	private renderUpperBoxRow2(box: Box): void {
@@ -71,7 +84,33 @@ export class MeisaiForm {
 		let cols = box.splitToColumnsByWidths(16);
 		cols.forEach(col => {
 			comp.box(col);
-		})
+		});
+		comp.setFont("regular");
+		{
+			let c = cols[0];
+			comp.textIn("受診科", c, "center", "center");
+		}
+	}
+
+	private renderLowerBox(box: Box): void {
+		let comp = this.comp;
+		comp.box(box);
+		let rows = box.splitToRows(5);
+		this.renderLowerBoxRow1(rows[0]);
+		this.renderLowerBoxRow2(rows[1]);
+	}
+
+	private renderLowerBoxRow1(box: Box): void {
+		let comp = this.comp;
+		let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+		cols.forEach(col => comp.box(col));
+	}
+
+	private renderLowerBoxRow2(box: Box): void {
+		let comp = this.comp;
+		let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+		cols.forEach(col => comp.box(col));
+
 	}
 
 }
