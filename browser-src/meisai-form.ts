@@ -1,4 +1,6 @@
 import { Compiler, Op, Box } from "myclinic-drawer";
+import { Visit, Patient, VisitMeisai } from "./model";
+import * as kanjidate from "kanjidate";
 
 class FontSpec {
 	constructor(public name: string, public fontName: string, public size: number){};
@@ -7,10 +9,16 @@ class FontSpec {
 export class MeisaiForm {
 	private comp: Compiler;
 	private pages: Op[][];
+	private visit: Visit | null;
+	private patient: Patient | null;
+	private meisai: VisitMeisai | null;
 
-	constructor(){
+	constructor(visit: Visit | null, patient: Patient | null, meisai: VisitMeisai | null){
 		this.comp = new Compiler();
 		this.pages = [];
+		this.visit = visit;
+		this.patient = patient;
+		this.meisai = meisai;
 		let outer = this.pageA4();
 		let box = outer.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185);
 		let [upperBox, _, lowerBox] = box.splitToRows(10, 14);
@@ -68,13 +76,23 @@ export class MeisaiForm {
 			let c = cols[0];
 			comp.textIn("患者番号", c, "center", "center");
 		}
+		if( this.patient !== null ){
+			comp.textIn("" + this.patient.patientId, cols[1], "center", "center");
+		}
 		{
 			let c = cols[2];
 			comp.textIn("氏名", c, "center", "center");
 		}
+		if( this.patient !== null ){
+			comp.textIn("" + this.patient.lastName + " " + this.patient.firstName, cols[3], "center", "center");
+		}
 		{
 			let c = cols[4];
 			comp.textIn("受診日", c, "center", "center");
+		}
+		if( this.visit !== null ){
+			let at = kanjidate.format(kanjidate.f2, this.visit.visitedAt);
+			comp.textIn(at, cols[5], "center", "center");
 		}
 	}
 
