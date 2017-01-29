@@ -2,22 +2,16 @@ export class VisitMeisai {
 	charge: number;
 	futanWari: number;
 	totalTen: number;
-	sections: {
-		"初・再診料": VisitMeisaiItem[];
-		"医学管理等": VisitMeisaiItem[];
-		"在宅医療": VisitMeisaiItem[];
-		"検査": VisitMeisaiItem[];
-		"画像診断": VisitMeisaiItem[];
-		"投薬": VisitMeisaiItem[];
-		"注射": VisitMeisaiItem[];
-		"処置": VisitMeisaiItem[];
-		"その他": VisitMeisaiItem[];
-	};
+	sections: VisitMeisaiSection[];
+}
 
-	static sectionNames: string[] = [
-        "初・再診料", "医学管理等", "在宅医療", "検査", "画像診断",
-        "投薬", "注射", "処置", "その他"       
-    ];
+export class VisitMeisaiSection {
+	label: string;
+	items: VisitMeisaiItem[];
+	constructor(label: string, items: VisitMeisaiItem[]){
+		this.label = label;
+		this.items = items;
+	}
 }
 
 export class VisitMeisaiItem {
@@ -39,16 +33,16 @@ export function jsonToVisitMeisai(src: any): VisitMeisai {
 	meisai.charge = src.charge;
 	meisai.futanWari = src.futanWari;
 	meisai.totalTen = src.totalTen;
-	meisai.sections = {
-		"初・再診料": src.meisai["初・再診料"].map(jsonToVisitMeisaiItem),
-		"医学管理等": src.meisai["医学管理等"].map(jsonToVisitMeisaiItem),
-		"在宅医療": src.meisai["在宅医療"].map(jsonToVisitMeisaiItem),
-		"検査": src.meisai["検査"].map(jsonToVisitMeisaiItem),
-		"画像診断": src.meisai["画像診断"].map(jsonToVisitMeisaiItem),
-		"投薬": src.meisai["投薬"].map(jsonToVisitMeisaiItem),
-		"注射": src.meisai["注射"].map(jsonToVisitMeisaiItem),
-		"処置": src.meisai["処置"].map(jsonToVisitMeisaiItem),
-		"その他": src.meisai["その他"].map(jsonToVisitMeisaiItem),
-	};
+	let sections: VisitMeisaiSection[] = [];
+	sections.push(new VisitMeisaiSection("初・再診料", src.meisai["初・再診料"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("医学管理等", src.meisai["医学管理等"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("在宅医療", src.meisai["在宅医療"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("検査", src.meisai["検査"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("画像診断", src.meisai["画像診断"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("投薬", src.meisai["投薬"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("注射", src.meisai["注射"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("処置", src.meisai["処置"].map(jsonToVisitMeisaiItem)));
+	sections.push(new VisitMeisaiSection("その他", src.meisai["その他"].map(jsonToVisitMeisaiItem)));
+	meisai.sections = sections;
 	return meisai;
 }

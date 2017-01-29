@@ -58,7 +58,7 @@ class MeisaiForm {
     renderUpperBoxRow1(box) {
         let comp = this.comp;
         comp.box(box);
-        let cols = box.splitToColumnsByWidths(16, 31, 10, 39, 17);
+        let cols = box.splitToColumnsByWidths(17, 30, 10, 40, 16);
         cols.forEach(col => {
             comp.box(col);
         });
@@ -89,7 +89,7 @@ class MeisaiForm {
     renderUpperBoxRow2(box) {
         let comp = this.comp;
         comp.box(box);
-        let cols = box.splitToColumnsByWidths(16);
+        let cols = box.splitToColumnsByWidths(17);
         cols.forEach(col => {
             comp.box(col);
         });
@@ -108,7 +108,7 @@ class MeisaiForm {
     }
     renderLowerBoxRow1(box) {
         let comp = this.comp;
-        let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+        let cols = box.splitToColumnsByWidths(17, 80, 22.5);
         cols.forEach(col => comp.box(col));
         comp.setFont("regular");
         comp.textIn("部", cols[0], "center", "center");
@@ -118,8 +118,46 @@ class MeisaiForm {
     }
     renderLowerBoxRow2(box) {
         let comp = this.comp;
-        let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+        comp.setFont("regular");
+        let cols = box.splitToColumnsByWidths(17, 80, 22.5);
         cols.forEach(col => comp.box(col));
+        let [colBu, colItem, colTen, colTimes] = cols;
+        let horizOffset = 1.3;
+        let leading = 2;
+        let itemLeading = 1;
+        let top = colBu.top() + leading;
+        let fontSize = comp.getCurrentFontSize();
+        if (this.meisai !== null) {
+            this.meisai.sections.forEach(sect => {
+                if (sect.items.length === 0) {
+                    return;
+                }
+                top = renderSection(sect, top);
+                top += leading;
+            });
+        }
+        comp.line(box.left(), top, box.right(), top);
+        function renderSection(sect, top) {
+            let lineTop = top;
+            sect.items.forEach((item, index) => {
+                if (index === 0) {
+                    comp.textAt(sect.label, colBu.left() + horizOffset, top, "left", "top");
+                }
+                let lines = comp.breakLines(item.label, colItem.width() - horizOffset * 2, fontSize);
+                if (lines.length === 0) {
+                    lines = [""];
+                }
+                lines.forEach((line, lineIndex) => {
+                    comp.textAt(line, colItem.left() + horizOffset, lineTop, "left", "top");
+                    if (lineIndex === (lines.length - 1)) {
+                        comp.textAt("" + item.tanka, colTen.right() - horizOffset, lineTop, "right", "top");
+                        comp.textAt("" + item.count, colTimes.right() - horizOffset, lineTop, "right", "top");
+                    }
+                    lineTop += fontSize + itemLeading;
+                });
+            });
+            return lineTop - itemLeading;
+        }
     }
 }
 exports.MeisaiForm = MeisaiForm;

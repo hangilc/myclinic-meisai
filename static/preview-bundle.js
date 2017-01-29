@@ -27147,7 +27147,7 @@
 	    renderUpperBoxRow1(box) {
 	        let comp = this.comp;
 	        comp.box(box);
-	        let cols = box.splitToColumnsByWidths(16, 31, 10, 39, 17);
+	        let cols = box.splitToColumnsByWidths(17, 30, 10, 40, 16);
 	        cols.forEach(col => {
 	            comp.box(col);
 	        });
@@ -27178,7 +27178,7 @@
 	    renderUpperBoxRow2(box) {
 	        let comp = this.comp;
 	        comp.box(box);
-	        let cols = box.splitToColumnsByWidths(16);
+	        let cols = box.splitToColumnsByWidths(17);
 	        cols.forEach(col => {
 	            comp.box(col);
 	        });
@@ -27197,7 +27197,7 @@
 	    }
 	    renderLowerBoxRow1(box) {
 	        let comp = this.comp;
-	        let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+	        let cols = box.splitToColumnsByWidths(17, 80, 22.5);
 	        cols.forEach(col => comp.box(col));
 	        comp.setFont("regular");
 	        comp.textIn("部", cols[0], "center", "center");
@@ -27207,8 +27207,46 @@
 	    }
 	    renderLowerBoxRow2(box) {
 	        let comp = this.comp;
-	        let cols = box.splitToColumnsByWidths(16, 81, 22.5);
+	        comp.setFont("regular");
+	        let cols = box.splitToColumnsByWidths(17, 80, 22.5);
 	        cols.forEach(col => comp.box(col));
+	        let [colBu, colItem, colTen, colTimes] = cols;
+	        let horizOffset = 1.3;
+	        let leading = 2;
+	        let itemLeading = 1;
+	        let top = colBu.top() + leading;
+	        let fontSize = comp.getCurrentFontSize();
+	        if (this.meisai !== null) {
+	            this.meisai.sections.forEach(sect => {
+	                if (sect.items.length === 0) {
+	                    return;
+	                }
+	                top = renderSection(sect, top);
+	                top += leading;
+	            });
+	        }
+	        comp.line(box.left(), top, box.right(), top);
+	        function renderSection(sect, top) {
+	            let lineTop = top;
+	            sect.items.forEach((item, index) => {
+	                if (index === 0) {
+	                    comp.textAt(sect.label, colBu.left() + horizOffset, top, "left", "top");
+	                }
+	                let lines = comp.breakLines(item.label, colItem.width() - horizOffset * 2, fontSize);
+	                if (lines.length === 0) {
+	                    lines = [""];
+	                }
+	                lines.forEach((line, lineIndex) => {
+	                    comp.textAt(line, colItem.left() + horizOffset, lineTop, "left", "top");
+	                    if (lineIndex === (lines.length - 1)) {
+	                        comp.textAt("" + item.tanka, colTen.right() - horizOffset, lineTop, "right", "top");
+	                        comp.textAt("" + item.count, colTimes.right() - horizOffset, lineTop, "right", "top");
+	                    }
+	                    lineTop += fontSize + itemLeading;
+	                });
+	            });
+	            return lineTop - itemLeading;
+	        }
 	    }
 	}
 	exports.MeisaiForm = MeisaiForm;
@@ -27221,11 +27259,14 @@
 	"use strict";
 	class VisitMeisai {
 	}
-	VisitMeisai.sectionNames = [
-	    "初・再診料", "医学管理等", "在宅医療", "検査", "画像診断",
-	    "投薬", "注射", "処置", "その他"
-	];
 	exports.VisitMeisai = VisitMeisai;
+	class VisitMeisaiSection {
+	    constructor(label, items) {
+	        this.label = label;
+	        this.items = items;
+	    }
+	}
+	exports.VisitMeisaiSection = VisitMeisaiSection;
 	class VisitMeisaiItem {
 	}
 	exports.VisitMeisaiItem = VisitMeisaiItem;
@@ -27241,17 +27282,17 @@
 	    meisai.charge = src.charge;
 	    meisai.futanWari = src.futanWari;
 	    meisai.totalTen = src.totalTen;
-	    meisai.sections = {
-	        "初・再診料": src.meisai["初・再診料"].map(jsonToVisitMeisaiItem),
-	        "医学管理等": src.meisai["医学管理等"].map(jsonToVisitMeisaiItem),
-	        "在宅医療": src.meisai["在宅医療"].map(jsonToVisitMeisaiItem),
-	        "検査": src.meisai["検査"].map(jsonToVisitMeisaiItem),
-	        "画像診断": src.meisai["画像診断"].map(jsonToVisitMeisaiItem),
-	        "投薬": src.meisai["投薬"].map(jsonToVisitMeisaiItem),
-	        "注射": src.meisai["注射"].map(jsonToVisitMeisaiItem),
-	        "処置": src.meisai["処置"].map(jsonToVisitMeisaiItem),
-	        "その他": src.meisai["その他"].map(jsonToVisitMeisaiItem),
-	    };
+	    let sections = [];
+	    sections.push(new VisitMeisaiSection("初・再診料", src.meisai["初・再診料"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("医学管理等", src.meisai["医学管理等"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("在宅医療", src.meisai["在宅医療"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("検査", src.meisai["検査"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("画像診断", src.meisai["画像診断"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("投薬", src.meisai["投薬"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("注射", src.meisai["注射"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("処置", src.meisai["処置"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("その他", src.meisai["その他"].map(jsonToVisitMeisaiItem)));
+	    meisai.sections = sections;
 	    return meisai;
 	}
 	exports.jsonToVisitMeisai = jsonToVisitMeisai;
