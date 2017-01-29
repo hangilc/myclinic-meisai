@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const myclinic_drawer_1 = require("myclinic-drawer");
+const service = require("./service");
 const print_util_1 = require("./print-util");
 const meisai_form_1 = require("./meisai-form");
 let data = window["data"];
@@ -30,8 +31,12 @@ if (printerWidget !== null) {
     widget.setPages(pages);
     printerWidget.appendChild(widget.dom);
 }
-const service_1 = require("./service");
 (() => __awaiter(this, void 0, void 0, function* () {
-    let visit = yield service_1.getVisit(1000);
+    console.log("await");
+    let visit = yield service.getVisit(1000);
+    let patient = yield service.getPatient(visit.patientId);
+    let meisai = yield service.calcMeisai(visit.visitId);
     console.log(visit);
+    console.log(patient);
+    console.log(meisai);
 }))();

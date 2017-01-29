@@ -25,9 +25,12 @@ if( printerWidget !== null ){
 	printerWidget.appendChild(widget.dom);
 }
 
-import { getVisit } from "./service";
-
 (async () => {
-	let visit = await getVisit(1000);
+	console.log("await");
+	let visit = await service.getVisit(1000);
+	let patient = await service.getPatient(visit.patientId);
+	let meisai = await service.calcMeisai(visit.visitId);
 	console.log(visit);
+	console.log(patient);
+	console.log(meisai);
 })();
