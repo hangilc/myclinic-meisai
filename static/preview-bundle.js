@@ -55,8 +55,8 @@
 	};
 	const myclinic_drawer_1 = __webpack_require__(1);
 	const service = __webpack_require__(6);
-	const print_util_1 = __webpack_require__(124);
-	const meisai_form_1 = __webpack_require__(126);
+	const print_util_1 = __webpack_require__(125);
+	const meisai_form_1 = __webpack_require__(127);
 	let data = window["data"] || {};
 	let visitId = +(data.visit_id || data.visitId);
 	(function () {
@@ -11459,7 +11459,7 @@
 	}
 	__export(__webpack_require__(10));
 	__export(__webpack_require__(11));
-	__export(__webpack_require__(127));
+	__export(__webpack_require__(124));
 
 
 /***/ },
@@ -26873,6 +26873,52 @@
 
 /***/ },
 /* 124 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class VisitMeisai {
+	}
+	exports.VisitMeisai = VisitMeisai;
+	class VisitMeisaiSection {
+	    constructor(label, items) {
+	        this.label = label;
+	        this.items = items;
+	    }
+	}
+	exports.VisitMeisaiSection = VisitMeisaiSection;
+	class VisitMeisaiItem {
+	}
+	exports.VisitMeisaiItem = VisitMeisaiItem;
+	function jsonToVisitMeisaiItem(src) {
+	    let item = new VisitMeisaiItem();
+	    item.count = src.count;
+	    item.label = src.label;
+	    item.tanka = src.tanka;
+	    return item;
+	}
+	function jsonToVisitMeisai(src) {
+	    let meisai = new VisitMeisai();
+	    meisai.charge = src.charge;
+	    meisai.futanWari = src.futanWari;
+	    meisai.totalTen = src.totalTen;
+	    let sections = [];
+	    sections.push(new VisitMeisaiSection("初・再診料", src.meisai["初・再診料"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("医学管理等", src.meisai["医学管理等"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("在宅医療", src.meisai["在宅医療"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("検査", src.meisai["検査"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("画像診断", src.meisai["画像診断"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("投薬", src.meisai["投薬"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("注射", src.meisai["注射"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("処置", src.meisai["処置"].map(jsonToVisitMeisaiItem)));
+	    sections.push(new VisitMeisaiSection("その他", src.meisai["その他"].map(jsonToVisitMeisaiItem)));
+	    meisai.sections = sections;
+	    return meisai;
+	}
+	exports.jsonToVisitMeisai = jsonToVisitMeisai;
+
+
+/***/ },
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -26884,7 +26930,7 @@
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	const typed_dom_1 = __webpack_require__(125);
+	const typed_dom_1 = __webpack_require__(126);
 	const service_1 = __webpack_require__(6);
 	class PrinterWidget {
 	    constructor(settingKey) {
@@ -26990,7 +27036,7 @@
 
 
 /***/ },
-/* 125 */
+/* 126 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -27084,7 +27130,7 @@
 
 
 /***/ },
-/* 126 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -27217,7 +27263,18 @@
 	        let top = colBu.top() + leading;
 	        let fontSize = comp.getCurrentFontSize();
 	        if (this.meisai !== null) {
-	            this.meisai.sections.forEach(sect => {
+	            let sections = this.meisai.sections;
+	            // for multi-page dev
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            sections = sections.concat(sections);
+	            // ///////////////////
+	            sections.forEach(sect => {
 	                if (sect.items.length === 0) {
 	                    return;
 	                }
@@ -27250,52 +27307,6 @@
 	    }
 	}
 	exports.MeisaiForm = MeisaiForm;
-
-
-/***/ },
-/* 127 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class VisitMeisai {
-	}
-	exports.VisitMeisai = VisitMeisai;
-	class VisitMeisaiSection {
-	    constructor(label, items) {
-	        this.label = label;
-	        this.items = items;
-	    }
-	}
-	exports.VisitMeisaiSection = VisitMeisaiSection;
-	class VisitMeisaiItem {
-	}
-	exports.VisitMeisaiItem = VisitMeisaiItem;
-	function jsonToVisitMeisaiItem(src) {
-	    let item = new VisitMeisaiItem();
-	    item.count = src.count;
-	    item.label = src.label;
-	    item.tanka = src.tanka;
-	    return item;
-	}
-	function jsonToVisitMeisai(src) {
-	    let meisai = new VisitMeisai();
-	    meisai.charge = src.charge;
-	    meisai.futanWari = src.futanWari;
-	    meisai.totalTen = src.totalTen;
-	    let sections = [];
-	    sections.push(new VisitMeisaiSection("初・再診料", src.meisai["初・再診料"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("医学管理等", src.meisai["医学管理等"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("在宅医療", src.meisai["在宅医療"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("検査", src.meisai["検査"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("画像診断", src.meisai["画像診断"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("投薬", src.meisai["投薬"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("注射", src.meisai["注射"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("処置", src.meisai["処置"].map(jsonToVisitMeisaiItem)));
-	    sections.push(new VisitMeisaiSection("その他", src.meisai["その他"].map(jsonToVisitMeisaiItem)));
-	    meisai.sections = sections;
-	    return meisai;
-	}
-	exports.jsonToVisitMeisai = jsonToVisitMeisai;
 
 
 /***/ }

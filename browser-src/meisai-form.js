@@ -128,7 +128,18 @@ class MeisaiForm {
         let top = colBu.top() + leading;
         let fontSize = comp.getCurrentFontSize();
         if (this.meisai !== null) {
-            this.meisai.sections.forEach(sect => {
+            let sections = this.meisai.sections;
+            // for multi-page dev
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            sections = sections.concat(sections);
+            // ///////////////////
+            sections.forEach(sect => {
                 if (sect.items.length === 0) {
                     return;
                 }
