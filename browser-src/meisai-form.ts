@@ -71,7 +71,6 @@ export class MeisaiForm {
 		this.newPage();
 		let maxPage = 10;
 		while( --maxPage > 0 && this.meisaiLines.length > 0 ){
-			console.log(this.meisaiLines.length);
 			this.newPage();
 		}
 	}

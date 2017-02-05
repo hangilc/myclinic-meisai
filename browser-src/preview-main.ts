@@ -18,20 +18,29 @@ let visitId: number = +(data.visit_id || data.visitId);
 	form.done();
 	let pages: Op[][] = form.getPages();
 	let previewArea = document.getElementById("preview-wrapper");
-	let previewSvg = drawerToSvg(pages.length > 0 ? pages[pages.length-1] : [], {
-		width: "210mm",
-		height: "297mm",
-		viewBox: "0 0 210 297"
-	});
-	if( previewArea !== null ){
-		previewArea.appendChild(previewSvg);
-	}
+	renderPreview(pages.length > 0 ? pages[0] : []);
 	let printerSettingKey = "meisai-printer-setting";
 	let printerWidget = document.getElementById("printer-widget");
 	if( printerWidget !== null ){
 		let widget = new PrinterWidget(printerSettingKey);
+		widget.onPageChange = pageIndex => {
+			renderPreview(pages[pageIndex]);
+			widget.updateNavPage(pageIndex+1);
+		};
 		widget.setPages(pages);
 		printerWidget.appendChild(widget.dom);
+	}
+
+	function renderPreview(page: Op[]): void {
+		if( previewArea !== null ){
+			previewArea.innerHTML = "";
+			let previewSvg = drawerToSvg(page, {
+				width: "210mm",
+				height: "297mm",
+				viewBox: "0 0 210 297"
+			});
+			previewArea.appendChild(previewSvg);
+		}
 	}
 })();
 

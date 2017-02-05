@@ -72,20 +72,28 @@
 	        form.done();
 	        let pages = form.getPages();
 	        let previewArea = document.getElementById("preview-wrapper");
-	        let previewSvg = myclinic_drawer_1.drawerToSvg(pages.length > 0 ? pages[pages.length - 1] : [], {
-	            width: "210mm",
-	            height: "297mm",
-	            viewBox: "0 0 210 297"
-	        });
-	        if (previewArea !== null) {
-	            previewArea.appendChild(previewSvg);
-	        }
+	        renderPreview(pages.length > 0 ? pages[0] : []);
 	        let printerSettingKey = "meisai-printer-setting";
 	        let printerWidget = document.getElementById("printer-widget");
 	        if (printerWidget !== null) {
 	            let widget = new print_util_1.PrinterWidget(printerSettingKey);
+	            widget.onPageChange = pageIndex => {
+	                renderPreview(pages[pageIndex]);
+	                widget.updateNavPage(pageIndex + 1);
+	            };
 	            widget.setPages(pages);
 	            printerWidget.appendChild(widget.dom);
+	        }
+	        function renderPreview(page) {
+	            if (previewArea !== null) {
+	                previewArea.innerHTML = "";
+	                let previewSvg = myclinic_drawer_1.drawerToSvg(page, {
+	                    width: "210mm",
+	                    height: "297mm",
+	                    viewBox: "0 0 210 297"
+	                });
+	                previewArea.appendChild(previewSvg);
+	            }
 	        }
 	    });
 	})();
@@ -26932,11 +26940,47 @@
 	};
 	const typed_dom_1 = __webpack_require__(126);
 	const service_1 = __webpack_require__(6);
+	class Nav {
+	    constructor() {
+	        this.onPageChange = _ => { };
+	        this.dom = typed_dom_1.h.span({}, []);
+	    }
+	    update(currentPage, totalPages) {
+	        this.dom.innerHTML = "";
+	        let prevLink = typed_dom_1.h.a({}, ["<"]);
+	        let nextLink = typed_dom_1.h.a({}, [">"]);
+	        prevLink.addEventListener("click", event => {
+	            if (currentPage > 1) {
+	                this.onPageChange(currentPage - 1);
+	            }
+	        });
+	        nextLink.addEventListener("click", event => {
+	            if (currentPage < totalPages) {
+	                this.onPageChange(currentPage + 1);
+	            }
+	        });
+	        if (totalPages > 1) {
+	            typed_dom_1.appendToElement(this.dom, [
+	                prevLink,
+	                " ",
+	                `${currentPage} / ${totalPages}`,
+	                " ",
+	                nextLink
+	            ]);
+	        }
+	    }
+	}
 	class PrinterWidget {
 	    constructor(settingKey) {
+	        this.onPageChange = _ => { };
 	        this.pages = [];
 	        this.settingKey = null;
 	        this.settingName = null;
+	        this.nav = new Nav();
+	        this.nav.onPageChange = newPage => {
+	            let pageIndex = newPage - 1;
+	            this.onPageChange(pageIndex);
+	        };
 	        if (settingKey !== undefined) {
 	            this.settingKey = settingKey;
 	            this.settingName = getPrinterSetting(settingKey);
@@ -26965,6 +27009,8 @@
 	        this.dom = typed_dom_1.h.div({}, [
 	            printButton,
 	            " ",
+	            this.nav.dom,
+	            " ",
 	            "プリンター：",
 	            this.settingNameSpan,
 	            " ",
@@ -26975,7 +27021,11 @@
 	        ]);
 	    }
 	    setPages(pages) {
+	        this.nav.update(1, pages.length);
 	        this.pages = pages;
+	    }
+	    updateNavPage(page) {
+	        this.nav.update(page, this.pages.length);
 	    }
 	    fillSelectWorkarea(settings) {
 	        let dom = this.selectWorkarea;
@@ -27195,7 +27245,6 @@
 	        this.newPage();
 	        let maxPage = 10;
 	        while (--maxPage > 0 && this.meisaiLines.length > 0) {
-	            console.log(this.meisaiLines.length);
 	            this.newPage();
 	        }
 	    }

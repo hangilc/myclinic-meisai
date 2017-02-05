@@ -9,11 +9,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const typed_dom_1 = require("./typed-dom");
 const service_1 = require("./service");
+class Nav {
+    constructor() {
+        this.onPageChange = _ => { };
+        this.dom = typed_dom_1.h.span({}, []);
+    }
+    update(currentPage, totalPages) {
+        this.dom.innerHTML = "";
+        let prevLink = typed_dom_1.h.a({}, ["<"]);
+        let nextLink = typed_dom_1.h.a({}, [">"]);
+        prevLink.addEventListener("click", event => {
+            if (currentPage > 1) {
+                this.onPageChange(currentPage - 1);
+            }
+        });
+        nextLink.addEventListener("click", event => {
+            if (currentPage < totalPages) {
+                this.onPageChange(currentPage + 1);
+            }
+        });
+        if (totalPages > 1) {
+            typed_dom_1.appendToElement(this.dom, [
+                prevLink,
+                " ",
+                `${currentPage} / ${totalPages}`,
+                " ",
+                nextLink
+            ]);
+        }
+    }
+}
 class PrinterWidget {
     constructor(settingKey) {
+        this.onPageChange = _ => { };
         this.pages = [];
         this.settingKey = null;
         this.settingName = null;
+        this.nav = new Nav();
+        this.nav.onPageChange = newPage => {
+            let pageIndex = newPage - 1;
+            this.onPageChange(pageIndex);
+        };
         if (settingKey !== undefined) {
             this.settingKey = settingKey;
             this.settingName = getPrinterSetting(settingKey);
@@ -42,6 +78,8 @@ class PrinterWidget {
         this.dom = typed_dom_1.h.div({}, [
             printButton,
             " ",
+            this.nav.dom,
+            " ",
             "プリンター：",
             this.settingNameSpan,
             " ",
@@ -52,7 +90,11 @@ class PrinterWidget {
         ]);
     }
     setPages(pages) {
+        this.nav.update(1, pages.length);
         this.pages = pages;
+    }
+    updateNavPage(page) {
+        this.nav.update(page, this.pages.length);
     }
     fillSelectWorkarea(settings) {
         let dom = this.selectWorkarea;
