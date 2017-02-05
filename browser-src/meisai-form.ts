@@ -2,177 +2,64 @@ import { Compiler, Op, Box } from "myclinic-drawer";
 import { Visit, Patient, VisitMeisai, VisitMeisaiSection, VisitMeisaiItem } from "./model";
 import * as kanjidate from "kanjidate";
 
-class FontSpec {
-	constructor(public name: string, public fontName: string, public size: number){};
-}
+let breakLines = Compiler.breakLines;
 
-class Point {
-	x: number;
-	y: number;
-	constructor(x: number, y: number){
-		this.x = x;
-		this.y = y;
+class MeisaiLine {
+	bu: string | null;
+	item: string;
+	ten: string | null;
+	times: string | null;
+
+	constructor(bu: string | null, item: string, ten: string | null, times: string | null){
+		this.bu = bu;
+		this.item = item;
+		this.ten = ten;
+		this.times = times;
 	}
 }
 
-class RenderEnv {
-	titleFont: string;
-	regularFont: string;
-}
-
-class Layout {
-	titleCenterPoint: Point;
-	upperBox: UpperBoxLayout;
-	lowerBox: LowerBoxLayout;
-
-	constructor(){
-		let page = Box.createA4Box();
-		let box = page.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185);
-		let [upperBox, _, lowerBox] = box.splitToRows(10, 14);
-		this.titleCenterPoint = new Point(box.cx(), 30);
-		this.upperBox = new UpperBoxLayout(upperBox);
-		this.lowerBox = new LowerBoxLayout(lowerBox);
-	}
-
-	renderBlank(comp: Compiler, env: RenderEnv): void {
-		comp.setFont(env.titleFont);
-		comp.textAt("診療明細書", this.titleCenterPoint.x, this.titleCenterPoint.y, "center", "center");
-		comp.setFont(env.regularFont);
-		this.upperBox.renderBlank(comp, env);
-		this.lowerBox.renderBlank(comp, env);
-	}
-}
-
-class UpperBoxLayout {
-	frame: Box;
-	row1: UpperBoxRow1Layout;
-	row2: UpperBoxRow2Layout;
-
-	constructor(box: Box){
-		this.frame = box;
-		let [row1, row2] = box.splitToEvenRows(2);
-		this.row1 = new UpperBoxRow1Layout(row1);
-		this.row2 = new UpperBoxRow2Layout(row2);
-	}
-
-	renderBlank(comp: Compiler, env: RenderEnv): void {
-		comp.box(this.frame);
-		comp.frameBottom(this.row1.frame);
-		this.row1.renderBlank(comp, env);
-		this.row2.renderBlank(comp, env);
-	}
-}
-
-class UpperBoxRow1Layout {
-	frame: Box;
-	cols: Box[];
-
-	constructor(box: Box){
-		this.frame = box;
-		this.cols = box.splitToColumnsByWidths(17, 30, 10, 40, 16);
-	}
-
-	renderBlank(comp: Compiler, env: RenderEnv): void {
-		let cols = this.cols;
-		for(let i=0;i<cols.length-1;i++){
-			comp.frameRight(cols[i]);
-		}
-		comp.textIn("患者番号", cols[0], "center", "center");
-		comp.textIn("氏名", cols[2], "center", "center");
-		comp.textIn("受診日", cols[4], "center", "center");
-	}
-}
-
-class UpperBoxRow2Layout {
-	frame: Box;
-	cols: Box[];
-
-	constructor(box: Box){
-		this.frame = box;
-		this.cols = box.splitToColumnsByWidths(17);
-	}
-
-	renderBlank(comp: Compiler, env: RenderEnv): void {
-		comp.frameRight(this.cols[0]);
-		comp.textIn("受診科", this.cols[0], "center", "center");
-	}
-}
-
-class LowerBoxLayout {
-	frame: Box;
-
-	constructor(box: Box){
-		this.frame = box;
-	}
-
-	renderBlank(comp: Compiler, env: RenderEnv): void {
-		comp.box(this.frame);
-	}
+function makeMeisaiLines(sections: VisitMeisaiSection[], itemWidth: number, fontSize: number): MeisaiLine[] {
+	let meisaiLines: MeisaiLine[] = [];
+	sections.forEach(section => {
+		let sectionLabel = section.label;
+		section.items.forEach((item, itemIndex) => {
+			let lines = breakLines(item.label, itemWidth, fontSize);
+			lines.forEach((line, lineIndex) => {
+				let bu: string | null = null;
+				let ten: string | null = null;
+				let times: string | null = null;
+				if( itemIndex === 0 && lineIndex === 0 ){
+					bu = sectionLabel;
+				}
+				if( lineIndex === lines.length - 1 ){
+					ten = "" + item.tanka;
+					times = "" + item.count;
+				}
+				meisaiLines.push(new MeisaiLine(bu, line, ten, times));
+			})
+		})
+	});
+	return meisaiLines;
 }
 
 export class MeisaiForm {
 	private comp: Compiler;
 	private pages: Op[][] = [];
+	private visit: Visit | null = null;
+	private patient: Patient | null = null;
+	private pageBox: Box = Box.createA4Box();
+	private itemColumnWidth: number = 80;
+	private itemFontSize: number = 3;
+	private meisaiLines: MeisaiLine[] = [];
 
 	constructor(visit: Visit | null, patient: Patient | null, meisai: VisitMeisai | null){
-		this.comp = new Compiler();
-		let env = new RenderEnv();
-		let layout = new Layout();
-		let comp = this.comp;
-		comp.createFont("title-font", "MS Gothic", 6);
-		comp.createFont("regular", "MS Gothic", 3);
-		comp.createPen("regular", 0, 0, 0, 0.4);
-		comp.setPen("regular");
-		env.titleFont = "title-font";
-		env.regularFont = "regular"
-		layout.renderBlank(comp, env);
-	}
-
-	done(): void {
-		let ops = this.comp.getOps();
-		if( ops.length > 0 ){
-			this.pages.push(ops);
-		}
-	}
-
-	getPages(): Op[][] {
-		return this.pages;
-	}
-}
-
-export class MeisaiFormOrig {
-	private comp: Compiler;
-	private pages: Op[][];
-	private visit: Visit | null;
-	private patient: Patient | null;
-	private meisai: VisitMeisai | null;
-	private outerFrame: Box;
-
-	constructor(visit: Visit | null, patient: Patient | null, meisai: VisitMeisai | null){
-		this.comp = new Compiler();
-		this.pages = [];
 		this.visit = visit;
 		this.patient = patient;
-		this.meisai = meisai;
-		this.outerFrame = this.pageA4();
-		this.prelude();
-		let outer = this.pageA4();
-		let box = outer.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185);
-		let [upperBox, _, lowerBox] = box.splitToRows(10, 14);
-		let comp = this.comp;
-		this.installFonts([
-			new FontSpec("title-font", "MS Gothic", 6),
-			new FontSpec("regular", "MS Gothic", 3),
-		]);
-		comp.createPen("regular", 0, 0, 0, 0.4);
-		comp.setPen("regular");
-		comp.setFont("title-font");
-		comp.textAt("診療明細書", box.cx(), 30, "center", "center");
-		this.renderUpperBox(upperBox);
-		this.renderLowerBox(lowerBox);
-	}
-
-	prelude(): void {
+		this.comp = new Compiler();
+		if( meisai !== null ){
+			this.meisaiLines = makeMeisaiLines(meisai.sections, this.itemColumnWidth, this.itemFontSize);
+		}
+		this.newPage();
 	}
 
 	done(): void {
@@ -186,25 +73,32 @@ export class MeisaiFormOrig {
 		return this.pages;
 	}
 
-	private pageA4(): Box {
-		return Box.createA4Box();
+	private newPage(): void {
+		this.prolog();
+		let box = this.pageBox.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185);
+		let [upperBox, _, lowerBox] = box.splitToRows(10, 14);
+		this.comp.setFont("title-font");
+		this.comp.textAt("診療明細書", box.cx(), 30, "center", "center");
+		this.upperBox(upperBox);
+		this.lowerBox(lowerBox);
 	}
 
-	private installFonts(specs: FontSpec[]): void{
+	private prolog(): void {
 		let comp = this.comp;
-		specs.forEach(spec => {
-			comp.createFont(spec.name, spec.fontName, spec.size);
-		})
+		comp.createFont("title-font", "MS Gothic", 6);
+		comp.createFont("regular", "MS Gothic", this.itemFontSize);
+		comp.createPen("regular", 0, 0, 0, 0.4);
+		comp.setPen("regular");
 	}
 
-	private renderUpperBox(box: Box): void {
+	private upperBox(box: Box): void {
 		let comp = this.comp;
 		let [row1, row2] = box.splitToEvenRows(2);
-		this.renderUpperBoxRow1(row1);
-		this.renderUpperBoxRow2(row2);
+		this.upperBoxRow1(row1);
+		this.upperBoxRow2(row2);
 	}
 
-	private renderUpperBoxRow1(box: Box): void {
+	private upperBoxRow1(box: Box): void {
 		let comp = this.comp;
 		comp.box(box);
 		let cols = box.splitToColumnsByWidths(17, 30, 10, 40, 16);
@@ -236,7 +130,7 @@ export class MeisaiFormOrig {
 		}
 	}
 
-	private renderUpperBoxRow2(box: Box): void {
+	private upperBoxRow2(box: Box): void {
 		let comp = this.comp;
 		comp.box(box);
 		let cols = box.splitToColumnsByWidths(17);
@@ -250,15 +144,15 @@ export class MeisaiFormOrig {
 		}
 	}
 
-	private renderLowerBox(box: Box): void {
+	private lowerBox(box: Box): void {
 		let comp = this.comp;
 		comp.box(box);
 		let rows = box.splitToRows(5);
-		this.renderLowerBoxRow1(rows[0]);
-		this.renderLowerBoxRow2(rows[1]);
+		this.lowerBoxRow1(rows[0]);
+		this.lowerBoxRow2(rows[1]);
 	}
 
-	private renderLowerBoxRow1(box: Box): void {
+	private lowerBoxRow1(box: Box): void {
 		let comp = this.comp;
 		let cols = box.splitToColumnsByWidths(17, 80, 22.5);
 		cols.forEach(col => comp.box(col));
@@ -269,61 +163,57 @@ export class MeisaiFormOrig {
 		comp.textIn("回　数", cols[3], "center", "center");
 	}
 
-	private renderLowerBoxRow2(box: Box): void {
+	private lowerBoxRow2(box: Box): void {
 		let comp = this.comp;
 		comp.setFont("regular");
-		let cols = box.splitToColumnsByWidths(17, 80, 22.5);
+		let cols = box.splitToColumnsByWidths(17, this.itemColumnWidth, 22.5);
 		cols.forEach(col => comp.box(col));
 		let [colBu, colItem, colTen, colTimes] = cols;
 		let horizOffset = 1.3;
 		let leading = 2;
 		let itemLeading = 1;
-		let top = colBu.top() + leading;
-		let fontSize: number = comp.getCurrentFontSize();
-		if( this.meisai !== null ){
-			let sections = this.meisai.sections;
-
-			// for multi-page dev
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			sections = sections.concat(sections);
-			// ///////////////////
-
-			sections.forEach(sect => {
-				if( sect.items.length === 0 ){
-					return;
-				}
-				top = renderSection(sect, top);
-				top += leading;
-			})
+		let topOffset = leading;
+		console.log(JSON.stringify(this.meisaiLines, null, 2));
+		for(let i=0;i<this.meisaiLines.length;i++){
+			let itemLine = this.meisaiLines[i];
+			if( i !== 0 && itemLine.bu !== null ){
+				topOffset += leading;
+			} else {
+				topOffset += itemLeading;
+			}
+			renderBu(itemLine.bu);
+			renderItem(itemLine.item);
+			renderTen(itemLine.ten);
+			renderTimes(itemLine.times);
+			topOffset += comp.getCurrentFontSize();
 		}
-		comp.line(box.left(), top, box.right(), top);
 
-		function renderSection(sect: VisitMeisaiSection, top: number): number {
-			let lineTop = top;
-			sect.items.forEach((item, index) => {
-				if( index === 0 ){
-					comp.textAt(sect.label, colBu.left() + horizOffset, top, "left", "top");
-				}
-				let lines = comp.breakLines(item.label, colItem.width() - horizOffset * 2, fontSize);
-				if( lines.length === 0 ){
-					lines = [""];
-				}
-				lines.forEach((line, lineIndex) => {
-					comp.textAt(line, colItem.left() + horizOffset, lineTop, "left", "top");
-					if( lineIndex === (lines.length - 1) ){
-						comp.textAt("" + item.tanka, colTen.right() - horizOffset, lineTop, "right", "top");
-						comp.textAt("" + item.count, colTimes.right() - horizOffset, lineTop, "right", "top");
-					}
-					lineTop += fontSize + itemLeading;
-				})
-			})
-			return lineTop - itemLeading;
+		function renderBu(bu: string | null): void {
+			if( bu === null ){
+				return;
+			} else {
+				comp.textAt(bu, colBu.left() + horizOffset, box.top() + topOffset, "left", "top");
+			}
+		}
+
+		function renderItem(item: string): void {
+			comp.textAt(item, colItem.left() + horizOffset, box.top() + topOffset, "left", "top");
+		}
+
+		function renderTen(item: string | null): void {
+			if( item === null ){
+				return;
+			} else {
+				comp.textAt(item, colTen.right() - horizOffset, box.top() + topOffset, "right", "top");
+			}
+		}
+
+		function renderTimes(item: string | null): void {
+			if( item === null ){
+				return;
+			} else {
+				comp.textAt(item, colTimes.right() - horizOffset, box.top() + topOffset, "right", "top");
+			}
 		}
 	}
 
