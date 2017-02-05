@@ -27330,6 +27330,10 @@
 	            topOffset += comp.getCurrentFontSize();
 	        }
 	        this.meisaiLines = [];
+	        {
+	            let lastY = box.top() + topOffset + itemLeading;
+	            comp.line(box.left(), lastY, box.right(), lastY);
+	        }
 	        function renderBu(bu) {
 	            if (bu === null) {
 	                return;
