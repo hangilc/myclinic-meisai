@@ -26,7 +26,7 @@ let visitId = +(data.visit_id || data.visitId);
         form.done();
         let pages = form.getPages();
         let previewArea = document.getElementById("preview-wrapper");
-        let previewSvg = myclinic_drawer_1.drawerToSvg(pages.length > 0 ? pages[0] : [], {
+        let previewSvg = myclinic_drawer_1.drawerToSvg(pages.length > 0 ? pages[pages.length - 1] : [], {
             width: "210mm",
             height: "297mm",
             viewBox: "0 0 210 297"

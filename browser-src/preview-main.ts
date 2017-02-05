@@ -18,7 +18,7 @@ let visitId: number = +(data.visit_id || data.visitId);
 	form.done();
 	let pages: Op[][] = form.getPages();
 	let previewArea = document.getElementById("preview-wrapper");
-	let previewSvg = drawerToSvg(pages.length > 0 ? pages[0] : [], {
+	let previewSvg = drawerToSvg(pages.length > 0 ? pages[pages.length-1] : [], {
 		width: "210mm",
 		height: "297mm",
 		viewBox: "0 0 210 297"

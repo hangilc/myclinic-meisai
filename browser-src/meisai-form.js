@@ -46,9 +46,23 @@ class MeisaiForm {
         this.patient = patient;
         this.comp = new myclinic_drawer_1.Compiler();
         if (meisai !== null) {
+            meisai.sections.forEach(section => {
+                let items = section.items.slice();
+                section.items = section.items.concat(items);
+                section.items = section.items.concat(items);
+                section.items = section.items.concat(items);
+                section.items = section.items.concat(items);
+                section.items = section.items.concat(items);
+                section.items = section.items.concat(items);
+            });
             this.meisaiLines = makeMeisaiLines(meisai.sections, this.itemColumnWidth, this.itemFontSize);
         }
         this.newPage();
+        let maxPage = 10;
+        while (--maxPage > 0 && this.meisaiLines.length > 0) {
+            console.log(this.meisaiLines.length);
+            this.newPage();
+        }
     }
     done() {
         let ops = this.comp.getOps();
@@ -59,9 +73,14 @@ class MeisaiForm {
     getPages() {
         return this.pages;
     }
+    nextPage() {
+        this.pages.push(this.comp.getOps());
+        this.comp = new myclinic_drawer_1.Compiler();
+        this.prolog();
+    }
     newPage() {
         this.prolog();
-        let box = this.pageBox.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185);
+        let box = this.pageBox.innerBox(30, 42, 30 + 140, 42 + 10 + 4 + 185 - 1);
         let [upperBox, _, lowerBox] = box.splitToRows(10, 14);
         this.comp.setFont("title-font");
         this.comp.textAt("診療明細書", box.cx(), 30, "center", "center");
@@ -151,15 +170,23 @@ class MeisaiForm {
         let horizOffset = 1.3;
         let leading = 2;
         let itemLeading = 1;
-        let topOffset = leading;
-        console.log(JSON.stringify(this.meisaiLines, null, 2));
+        let topOffset = itemLeading;
         for (let i = 0; i < this.meisaiLines.length; i++) {
             let itemLine = this.meisaiLines[i];
-            if (i !== 0 && itemLine.bu !== null) {
-                topOffset += leading;
+            if (i === 0) {
             }
             else {
-                topOffset += itemLeading;
+                if (itemLine.bu !== null) {
+                    topOffset += leading;
+                }
+                else {
+                    topOffset += itemLeading;
+                }
+            }
+            if (i > 0 && box.top() + topOffset + comp.getCurrentFontSize() + itemLeading > box.bottom()) {
+                this.meisaiLines = this.meisaiLines.slice(i);
+                this.nextPage();
+                return;
             }
             renderBu(itemLine.bu);
             renderItem(itemLine.item);
@@ -167,6 +194,7 @@ class MeisaiForm {
             renderTimes(itemLine.times);
             topOffset += comp.getCurrentFontSize();
         }
+        this.meisaiLines = [];
         function renderBu(bu) {
             if (bu === null) {
                 return;
