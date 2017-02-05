@@ -61,7 +61,7 @@ class FetchData {
 function fetchData(visitId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (visitId > 0) {
-            let visit = yield service.getVisit(1000);
+            let visit = yield service.getVisit(visitId);
             let patient = yield service.getPatient(visit.patientId);
             let meisai = yield service.calcMeisai(visit.visitId);
             return new FetchData(visit, patient, meisai);

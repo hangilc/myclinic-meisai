@@ -57,7 +57,7 @@ class FetchData {
 
 async function fetchData(visitId: number): Promise<FetchData|null> {
 	if( visitId > 0 ){
-		let visit = await service.getVisit(1000);
+		let visit = await service.getVisit(visitId);
 		let patient = await service.getPatient(visit.patientId);
 		let meisai = await service.calcMeisai(visit.visitId);
 		return new FetchData(visit, patient, meisai);

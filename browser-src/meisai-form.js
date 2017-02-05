@@ -46,15 +46,6 @@ class MeisaiForm {
         this.patient = patient;
         this.comp = new myclinic_drawer_1.Compiler();
         if (meisai !== null) {
-            meisai.sections.forEach(section => {
-                let items = section.items.slice();
-                section.items = section.items.concat(items);
-                section.items = section.items.concat(items);
-                section.items = section.items.concat(items);
-                section.items = section.items.concat(items);
-                section.items = section.items.concat(items);
-                section.items = section.items.concat(items);
-            });
             this.meisaiLines = makeMeisaiLines(meisai.sections, this.itemColumnWidth, this.itemFontSize);
         }
         this.newPage();
